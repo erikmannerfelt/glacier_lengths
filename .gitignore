@@ -1,0 +1,5 @@
+.env
+.vim/
+*__pycache__*
+*egg-info*
+examples/rhone/rhone.jpg
