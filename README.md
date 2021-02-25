@@ -1,4 +1,4 @@
-## glacier\_lengths --- Statistical glacier length calculations
+## glacier\_lengths — Statistical glacier length calculations
 
 Often when glacier lengths are calculated, only the glacier centerline is considered.
 This is arguably not a statistically representative measure for the entire front, as it just considers one point on the glacier outline.
@@ -7,7 +7,7 @@ The `glacier_lengths` package aims to simplify length calculations along an arbi
 ### Installation
 `pip install glacier_lengths` (will soon work)
 
-`pip install git+https://github.com/erikmannerfelt/glacier_lengths.git`
+`pip install https://github.com/erikmannerfelt/glacier_lengths.git`
 
 ### Example
 Calculate the length change of Rhonegletscher:
@@ -23,6 +23,7 @@ centerline = gpd.read_file("examples/rhone/data/centerline.shp").iloc[0]
 
 # Generate ~40 buffered lines around the glacier centerline
 old_buffered_lines = glacier_lengths.buffer_centerline(centerline.geometry, old_outline.geometry)
+# Cut the newly generated lines to the new_outline
 new_buffered_lines = glacier_lengths.cut_centerlines(old_buffered_centerlines, new_outline.geometry)
 
 # Measure the lengths of the old and new glacier centerlines.
