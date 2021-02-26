@@ -92,15 +92,21 @@ def buffer_centerline(centerline: shapely.geometry.LineString, glacier_outline: 
     type_check_single_line(centerline, "centerline")
     type_check_polygon(glacier_outline, "glacier_outline")
 
+    assert centerline.intersects(glacier_outline), "centerline does not intersect the glacier_outline!"
+
     # The maximum allowed line distance from the initial centreline point
     # This is to make sure that all lines have an almost common starting point (eg instead of being cropped mid-glacier)
-    distance_threshold = centerline.length * 0.1
+    distance_threshold = max(centerline.length * 0.1, max_radius * (2 ** 0.5))
 
     # Extrapolate the centerline back and forth to ensure that it will cut the glacier edges.
     coords = list(centerline.coords)
     coords.insert(0, extrapolate_point(coords[1], coords[0]))
     coords.insert(-1, extrapolate_point(coords[-2], coords[-1]))
-    extended_centreline = shapely.geometry.LineString(coords)
+    cropped_full_centerline = shapely.geometry.LineString(coords).intersection(glacier_outline)
+    full_centerline = sorted((line for line in iter_geom(cropped_full_centerline)), key=lambda line: line.length)[-1]
+    full_centerline_coords = list(full_centerline.coords)
+    full_centerline_coords.insert(-1, extrapolate_point(full_centerline_coords[-2], full_centerline_coords[-1]))
+    extended_centreline = shapely.geometry.LineString(full_centerline_coords)
 
     # Initialise a list of LineStrings
     buffered_centerlines: list[shapely.geometry.LineString] = []
@@ -155,7 +161,22 @@ def buffer_centerline(centerline: shapely.geometry.LineString, glacier_outline: 
             buffered_centerlines.append(line)
 
     # Return a merged version of the buffered centerlines
-    return shapely.ops.linemerge(buffered_centerlines)
+    merged_geometry = shapely.ops.linemerge(buffered_centerlines)
+    assert not merged_geometry.is_empty, "Buffer failed. Output geometry is empty"
+    assert merged_geometry.geom_type == "MultiLineString", f"Buffer had incorrect output: {type(merged_geometry)}"\
+        ", expected 'MultiLineString'"
+    return merged_geometry
+
+
+def geometry_to_line(geometry) -> Union[shapely.geometry.LineString, shapely.geometry.MultiLineString]:
+    if geometry.geom_type in ["LineString", "MultiLineString"]:
+        return geometry
+
+    if geometry.geom_type in ["Polygon", "MultiPolygon"]:
+        exteriors = [shapely.geometry.LineString(geom.exterior.coords) for geom in iter_geom(geometry)]
+        exterior = shapely.ops.linemerge(exteriors)
+
+        return exterior
 
 
 def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geometry.MultiLineString],
@@ -183,8 +204,11 @@ def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geom
                 longest_centerline = line
     # The maximum allowed line distance from the initial centreline point
     # This is to make sure that all lines have an almost common starting point (eg instead of being cropped mid-glacier)
-    distance_threshold = longest_centerline.length * 0.1
-    cut_geometry = shapely.ops.split(centerlines, cutting_geometry)
+    distance_threshold = longest_centerline.length * 0.2
+    cutter = geometry_to_line(cutting_geometry)
+    cut_geometry = shapely.ops.split(centerlines, cutter)
+
+    assert cut_geometry.length > 0
 
     cropped_centrelines: list[shapely.geometry.LineString] = []
     for line in iter_geom(cut_geometry):
@@ -198,11 +222,15 @@ def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geom
         if np.count_nonzero(distances < distance_threshold) == 0:
             continue
 
-        if (line.length / longest_centerline.length) < 0.6:
+        if (line.length / longest_centerline.length) < 0.2:
             continue
         cropped_centrelines.append(line)
 
-    return shapely.ops.linemerge(cropped_centrelines)
+    merged_lines = shapely.ops.linemerge(cropped_centrelines)
+
+    assert not merged_lines.is_empty, f"Centerline cutting failed: empty geometry"
+
+    return merged_lines
 
 
 def measure_lengths(centerlines: Union[shapely.geometry.LineString, shapely.geometry.MultiLineString]) -> np.ndarray:

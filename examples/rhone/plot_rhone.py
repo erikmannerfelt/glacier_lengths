@@ -14,7 +14,7 @@ def plot_rhone():
 
     centerline = gpd.read_file("examples/rhone/data/centerline.shp").iloc[0]
 
-    old_buffered_lines = glacier_lengths.buffer_centerline(centerline.geometry, old_outline.geometry)
+    old_buffered_lines = glacier_lengths.buffer_centerline(centerline.geometry, old_outline.geometry, max_radius=100)
     new_buffered_lines = glacier_lengths.cut_centerlines(old_buffered_lines, new_outline.geometry)
 
     old_lengths = glacier_lengths.measure_lengths(old_buffered_lines)
