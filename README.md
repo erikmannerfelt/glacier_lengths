@@ -7,7 +7,7 @@ The `glacier_lengths` package aims to simplify length calculations along an arbi
 ### Installation
 `pip install glacier_lengths` (will soon work)
 
-`pip install https://github.com/erikmannerfelt/glacier_lengths.git`
+`pip install git+https://github.com/erikmannerfelt/glacier_lengths.git`
 
 ### Example
 Calculate the length change of Rhonegletscher:
