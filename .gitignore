@@ -5,3 +5,5 @@
 examples/rhone/rhone.jpg
 build/
 dist/
+docs/build/
+docs/source/api/

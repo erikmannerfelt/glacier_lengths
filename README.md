@@ -29,7 +29,7 @@ centerline = gpd.read_file("examples/rhone/data/centerline.shp").iloc[0]
 # Generate ~40 buffered lines around the glacier centerline
 old_buffered_lines = glacier_lengths.buffer_centerline(centerline.geometry, old_outline.geometry)
 # Cut the newly generated lines to the new_outline
-new_buffered_lines = glacier_lengths.cut_centerlines(old_buffered_centerlines, new_outline.geometry)
+new_buffered_lines = glacier_lengths.cut_centerlines(old_buffered_lines, new_outline.geometry)
 
 # Measure the lengths of the old and new glacier centerlines.
 old_lengths = glacier_lengths.measure_lengths(old_buffered_lines)
