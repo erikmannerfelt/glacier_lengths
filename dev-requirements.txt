@@ -4,3 +4,6 @@ flake8
 sphinx
 numpydoc
 sphinx_rtd_theme
+shapely
+numpy
+pylint
