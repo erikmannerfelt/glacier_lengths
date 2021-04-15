@@ -1,6 +1,7 @@
 
 import geopandas as gpd
 import numpy as np
+import pytest
 
 import glacier_lengths
 
@@ -56,7 +57,13 @@ class TestCenterlines:
 
         cut_centerlines = glacier_lengths.cut_centerlines(buffered_centrelines, self.new_outline.geometry)
 
-        cut_line = self.new_outline.geometry.boundary
+        cut_lines = self.new_outline.geometry.boundary
+        if cut_lines.geom_type == "MultiLineString":
+            # Extract the longest line.
+            cut_line = sorted(cut_lines, key=lambda x: x.length)[-1]
+        else:
+            cut_line = cut_lines
+
         cut_centerlines2 = glacier_lengths.cut_centerlines(buffered_centrelines, cut_line)
 
         old_lengths = glacier_lengths.measure_lengths(buffered_centrelines)
@@ -66,6 +73,7 @@ class TestCenterlines:
         assert old_lengths.mean() > new_lengths.mean()
         assert abs(new_lengths.mean() - new_lengths2.mean()) < 0.01
 
+    @pytest.mark.skip("Not a quantitative test. Should be excluded in test suite.")
     def test_temp_plotting(self):
 
         from glacier_lengths.plotting import plot_centerlines
