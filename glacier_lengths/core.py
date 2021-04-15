@@ -38,7 +38,11 @@ def type_check_single_line(geometry: Any, variable_name: str) -> None:
 
 
 def type_check_line(geometry: Any, variable_name: str) -> None:
-    """Check if the given object is either a shapely.geometry.LineString or a MultiLineString."""
+    """
+    Check if the given object is either a shapely.geometry.LineString or a MultiLineString.
+
+    :raises TypeError: If the type is not a line.
+    """
     try:
         if geometry.geom_type in ["LineString", "MultiLineString"]:
             return
