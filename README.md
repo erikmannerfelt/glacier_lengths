@@ -1,5 +1,10 @@
 ## glacier\_lengths — Statistical glacier length calculations
 
+[![build](https://github.com/erikmannerfelt/glacier_lengths/actions/workflows/python-package.yml/badge.svg)](https://github.com/erikmannerfelt/glacier_lengths/actions/workflows/python-package.yml)
+[![pypi](https://github.com/erikmannerfelt/glacier_lengths/actions/workflows/python-publish.yml/badge.svg)](https://github.com/erikmannerfelt/glacier_lengths/actions/workflows/python-publish.yml)
+
+[![PyPI version fury.io](https://badge.fury.io/py/glacier-lengths.svg)](https://pypi.python.org/pypi/glacier-lengths/)
+
 Often when glacier lengths are calculated, only the glacier centerline is considered.
 This is arguably not a statistically representative measure for the entire front, as it just considers one point on the glacier outline.
 The `glacier_lengths` package aims to simplify length calculations along an arbitrary amount of lines buffered around the glacier centerline.
