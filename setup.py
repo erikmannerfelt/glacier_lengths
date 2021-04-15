@@ -1,4 +1,10 @@
+import os
 from distutils.core import setup
+
+REQS_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "requirements.txt")
+
+with open(REQS_FILENAME) as infile:
+    INSTALL_REQUIRES = infile.read().splitlines()
 
 setup(
     name="glacier_lengths",
@@ -8,6 +14,6 @@ setup(
     author="Erik Schytt Mannerfelt",
     author_email="mannerfelt@vaw.baug.ethz.ch",
     packages=["glacier_lengths"],
-    install_requires=["shapely", "numpy"],
+    install_requires=INSTALL_REQUIRES,
     extras_require={"matplotlib": ["matplotlib"]},
 )
