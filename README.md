@@ -2,6 +2,7 @@
 
 [![build](https://github.com/erikmannerfelt/glacier_lengths/actions/workflows/python-package.yml/badge.svg)](https://github.com/erikmannerfelt/glacier_lengths/actions/workflows/python-package.yml)
 [![pypi](https://github.com/erikmannerfelt/glacier_lengths/actions/workflows/python-publish.yml/badge.svg)](https://github.com/erikmannerfelt/glacier_lengths/actions/workflows/python-publish.yml)
+[![Documentation Status](https://readthedocs.org/projects/glacier-lengths/badge/?version=latest)](https://glacier-lengths.readthedocs.io/en/latest/?badge=latest)
 
 [![PyPI version fury.io](https://badge.fury.io/py/glacier-lengths.svg)](https://pypi.python.org/pypi/glacier-lengths/)
 
@@ -10,9 +11,12 @@ This is arguably not a statistically representative measure for the entire front
 The `glacier_lengths` package aims to simplify length calculations along an arbitrary amount of lines buffered around the glacier centerline.
 
 ### Installation
-`pip install glacier_lengths` (will soon work)
+`pip install glacier_lengths`
 
 `pip install git+https://github.com/erikmannerfelt/glacier_lengths.git`
+
+### Documentation
+See the documentation at https://glacier-lengths.readthedocs.io
 
 ### Example
 Calculate the length change of Rhonegletscher:
