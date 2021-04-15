@@ -13,7 +13,7 @@ GITHUB_URL = "https://github.com/erikmannerfelt/glacier_lengths"
 
 setup(
     name="glacier_lengths",
-    version="0.0.2",
+    version="0.0.3",
     description="Tools to measure glacier lengths statistically",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
