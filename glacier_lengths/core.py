@@ -1,3 +1,4 @@
+"""Core functions in the glacier_lengths package."""
 from __future__ import annotations
 
 from typing import Any, Iterable, Union
@@ -6,7 +7,7 @@ import numpy as np
 import shapely
 
 
-def extrapolate_point(point_1: tuple[float, float], point_2: tuple[float, float]) -> tuple[float, float]:
+def _extrapolate_point(point_1: tuple[float, float], point_2: tuple[float, float]) -> tuple[float, float]:
     """Create a point extrapoled in p1->p2 direction."""
     # p1 = [p1.x, p1.y]
     # p2 = [p2.x, p2.y]
@@ -18,7 +19,8 @@ def iter_geom(geometry) -> Iterable:
     """
     Return an iterable of the geometry.
 
-    Example: 'geometry' is either a LineString or a MultiLineString. Only MultiLineString can be iterated over normally.
+    Use case: If 'geometry' is either a LineString or a MultiLineString. \
+            Only MultiLineString can be iterated over normally.
     """
     if "Multi" in geometry.geom_type or geometry.geom_type == "GeometryCollection":
         return geometry
@@ -26,7 +28,7 @@ def iter_geom(geometry) -> Iterable:
     return [geometry]
 
 
-def type_check_single_line(geometry: Any, variable_name: str) -> None:
+def _type_check_single_line(geometry: Any, variable_name: str) -> None:
     """Check if the given object is a shapely.geometry.LineString."""
     try:
         if geometry.geom_type == "LineString":
@@ -37,7 +39,7 @@ def type_check_single_line(geometry: Any, variable_name: str) -> None:
     raise TypeError(f"{variable_name} had incorrect type: {type(geometry)}, expected: 'LineString'")
 
 
-def type_check_line(geometry: Any, variable_name: str) -> None:
+def _type_check_line(geometry: Any, variable_name: str) -> None:
     """
     Check if the given object is either a shapely.geometry.LineString or a MultiLineString.
 
@@ -53,7 +55,7 @@ def type_check_line(geometry: Any, variable_name: str) -> None:
                     " expected one of: ['LineString', 'MultiLineString']")
 
 
-def type_check_polygon(geometry: Any, variable_name: str) -> None:
+def _type_check_polygon(geometry: Any, variable_name: str) -> None:
     """Check if the given object is either a shapely.geometry.Polygon or a MultiPolygon."""
     try:
         if geometry.geom_type in ["Polygon", "MultiPolygon"]:
@@ -65,7 +67,7 @@ def type_check_polygon(geometry: Any, variable_name: str) -> None:
                     " expected one of: ['Polygon', 'MultiPolygon']")
 
 
-def type_check_single_line_or_polygon(geometry: Any, variable_name: str) -> None:
+def _type_check_single_line_or_polygon(geometry: Any, variable_name: str) -> None:
     """Check if the given object is either a shapely.geometry.Polygon, a MultiPolygon or a LineString."""
     try:
         if geometry.geom_type in ["Polygon", "MultiPolygon", "LineString"]:
@@ -93,8 +95,8 @@ def buffer_centerline(centerline: shapely.geometry.LineString, glacier_outline: 
     :returns: Multiple buffered glacier centerlines.
     """
     # Make sure the inputs have correct types.
-    type_check_single_line(centerline, "centerline")
-    type_check_polygon(glacier_outline, "glacier_outline")
+    _type_check_single_line(centerline, "centerline")
+    _type_check_polygon(glacier_outline, "glacier_outline")
 
     assert centerline.intersects(glacier_outline), "centerline does not intersect the glacier_outline!"
 
@@ -104,12 +106,12 @@ def buffer_centerline(centerline: shapely.geometry.LineString, glacier_outline: 
 
     # Extrapolate the centerline back and forth to ensure that it will cut the glacier edges.
     coords = list(centerline.coords)
-    coords.insert(0, extrapolate_point(coords[1], coords[0]))
-    coords.insert(-1, extrapolate_point(coords[-2], coords[-1]))
+    coords.insert(0, _extrapolate_point(coords[1], coords[0]))
+    coords.insert(-1, _extrapolate_point(coords[-2], coords[-1]))
     cropped_full_centerline = shapely.geometry.LineString(coords).intersection(glacier_outline)
     full_centerline = sorted((line for line in iter_geom(cropped_full_centerline)), key=lambda line: line.length)[-1]
     full_centerline_coords = list(full_centerline.coords)
-    full_centerline_coords.insert(-1, extrapolate_point(full_centerline_coords[-2], full_centerline_coords[-1]))
+    full_centerline_coords.insert(-1, _extrapolate_point(full_centerline_coords[-2], full_centerline_coords[-1]))
     extended_centreline = shapely.geometry.LineString(full_centerline_coords)
 
     # Initialise a list of LineStrings
@@ -173,14 +175,30 @@ def buffer_centerline(centerline: shapely.geometry.LineString, glacier_outline: 
 
 
 def geometry_to_line(geometry) -> Union[shapely.geometry.LineString, shapely.geometry.MultiLineString]:
-    if geometry.geom_type in ["LineString", "MultiLineString"]:
-        return geometry
+    """
+    Try to convert a given geometry to a line.
+
+    :param geometry: A shapely geometry object.
+
+    :raises ValueError: If the geometry is in an unsupported format.
+
+    :returns: A LineString or MultiLineString representing the given geometry.
+    """
+    try:
+        if geometry.geom_type in ["LineString", "MultiLineString"]:
+            return geometry
+    except AttributeError as exception:
+        if "object has no attribute" not in str(exception):
+            raise exception
+        raise ValueError("Given geometry does not have the 'geom_type' attribute. Is it a shapely geometry type?")
 
     if geometry.geom_type in ["Polygon", "MultiPolygon"]:
         exteriors = [shapely.geometry.LineString(geom.exterior.coords) for geom in iter_geom(geometry)]
         exterior = shapely.ops.linemerge(exteriors)
 
         return exterior
+
+    raise ValueError(f"Geometry is in unsupported format. ({type(geometry)})")
 
 
 def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geometry.MultiLineString],
@@ -197,8 +215,8 @@ def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geom
 
     :returns: Cut glacier centerlines.
     """
-    type_check_line(centerlines, "centerlines")
-    type_check_single_line_or_polygon(cutting_geometry, "cutting_geometry")
+    _type_check_line(centerlines, "centerlines")
+    _type_check_single_line_or_polygon(cutting_geometry, "cutting_geometry")
 
     # Find the longest centerline and use it as a proxy for the actual centerline.
     longest_centerline = centerlines if centerlines.geom_type == "LineString" else centerlines[0]
@@ -232,7 +250,7 @@ def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geom
 
     merged_lines = shapely.ops.linemerge(cropped_centrelines)
 
-    assert not merged_lines.is_empty, f"Centerline cutting failed: empty geometry"
+    assert not merged_lines.is_empty, "Centerline cutting failed: empty geometry"
 
     return merged_lines
 
