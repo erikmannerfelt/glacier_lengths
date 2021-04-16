@@ -1,0 +1,41 @@
+{% set data = load_setup_py_data(setup_file="setup.py", from_recipe_dir=True) %}
+
+{% set github_url = "https://github.com/erikmannerfelt/glacier_lengths" %}
+
+package:
+  name: "{{ data['name'] }}"
+  version: "{{ data['version'] }}"
+
+source:
+        git_url: "{{ github_url }}"
+        git_rev: "v{{ data['version'] }}"
+
+
+build:
+        number: 0
+        script: python -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+        preserve_egg_dir: True
+        noarch: generic
+
+requirements:
+        host:
+                - python
+                - pip
+                - numpy
+                - shapely
+        run:
+                - python
+                - numpy
+                - shapely
+
+test:
+        imports:
+                - glacier_lengths
+
+
+about:
+        home: "{{ github_url }}"
+        license: Apache-2.0
+        license_file: LICENSE
+        summary: "{{ data['description'] }}"
+
