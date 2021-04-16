@@ -4,15 +4,16 @@ import numpy as np
 import pytest
 
 import glacier_lengths
+from glacier_lengths import examples
 
 
 def read_data():
-    outlines = gpd.read_file(glacier_lengths.get_example("rhone-outlines")).sort_values("year")
+    outlines = gpd.read_file(examples.get_example("rhone-outlines")).sort_values("year")
 
     old_outline = outlines.iloc[0]
     new_outline = outlines.iloc[1]
 
-    centerline_df = gpd.read_file(glacier_lengths.get_example("rhone-centerline"))
+    centerline_df = gpd.read_file(examples.get_example("rhone-centerline"))
 
     centerline = centerline_df.iloc[0]
 

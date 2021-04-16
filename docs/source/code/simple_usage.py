@@ -1,12 +1,13 @@
 import geopandas as gpd
 
 import glacier_lengths
+from glacier_lengths import examples
 
 # Read the example data
-outlines = gpd.read_file(glacier_lengths.get_example("rhone-outlines")).sort_values("year")
+outlines = gpd.read_file(examples.get_example("rhone-outlines")).sort_values("year")
 old_outline = outlines.iloc[0]
 new_outline = outlines.iloc[1]
-centerline = gpd.read_file(glacier_lengths.get_example("rhone-centerline")).iloc[0]
+centerline = gpd.read_file(examples.get_example("rhone-centerline")).iloc[0]
 
 # Generate ~40 buffered lines around the glacier centerline
 old_buffered_lines = glacier_lengths.buffer_centerline(centerline.geometry, old_outline.geometry)
