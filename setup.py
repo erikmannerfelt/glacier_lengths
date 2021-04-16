@@ -1,5 +1,6 @@
 import os
 from distutils.core import setup
+from glacier_lengths import __version__
 
 REQS_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "requirements.txt")
 
@@ -13,7 +14,7 @@ GITHUB_URL = "https://github.com/erikmannerfelt/glacier_lengths"
 
 setup(
     name="glacier_lengths",
-    version="0.0.3",
+    version=__version__,
     description="Tools to measure glacier lengths statistically",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",

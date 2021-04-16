@@ -13,6 +13,8 @@
 import os
 import sys
 
+from glacier_lengths import __version__
+
 # Allow conf.py to find the glacier_lengths module
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../"))
 # -- Project information -----------------------------------------------------
@@ -23,7 +25,7 @@ copyright = '2021, glacier_lengths contributors'
 author = 'glacier_lengths contributors'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.3'
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------
