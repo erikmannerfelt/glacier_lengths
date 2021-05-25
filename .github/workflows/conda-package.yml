@@ -24,10 +24,9 @@ jobs:
             uses: conda-incubator/setup-miniconda@v2
             with:
                 auto-update-conda: true
-                mamba-version: "*"
           - name: Install dependencies
             run: |
-              mamba install yaml requests conda-build
+              conda install yaml requests conda-build
               git clone https://github.com/erikmannerfelt/create_conda_meta .
               
           - name: Create conda metadata
