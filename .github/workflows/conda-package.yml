@@ -1,0 +1,36 @@
+# Build a conda package from the latest tag.
+
+on:
+  release:
+         types: [created]
+  workflow_dispatch:
+         inputs:
+            reason:
+              description: 'Reason'     
+              required: true
+              default: 'testing'
+   
+  
+jobs:
+   build-conda:
+       runs-on: ubuntu-latest
+       
+       steps:
+          - name: Setup miniconda
+            uses: conda-incubator/setup-miniconda@v2
+            with:
+                mamba-version="*"
+          - name: Install dependencies
+            run: |
+              mamba install yaml requests conda-build
+              git clone https://github.com/erikmannerfelt/create_conda_meta .
+              
+          - name: Create conda metadata
+            run: |
+              python make_meta_yml.py --doc_url=https://glacier-lengths.readthedocs.io erikmannerfelt glacier_lengths erikmannerfelt > meta.yaml
+              
+              conda-build .
+              
+         
+           
+     
