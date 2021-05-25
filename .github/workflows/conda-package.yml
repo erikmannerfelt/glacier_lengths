@@ -31,7 +31,7 @@ jobs:
               
           - name: Create conda metadata
             run: |
-              python make_meta_yml.py --doc_url=https://glacier-lengths.readthedocs.io erikmannerfelt glacier_lengths erikmannerfelt > meta.yaml
+              $CONDA/env/bin/python make_meta_yml.py --doc_url=https://glacier-lengths.readthedocs.io erikmannerfelt glacier_lengths erikmannerfelt > meta.yaml
               
               conda-build .
               
