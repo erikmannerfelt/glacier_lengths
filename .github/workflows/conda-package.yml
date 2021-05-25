@@ -1,14 +1,15 @@
 # Build a conda package from the latest tag.
 
 on:
-  workflow-dispatch
+  workflow_dispatch
   
 jobs:
    build-conda:
        runs-on: ubuntu-latest
        
        steps:
-          - uses: conda-incubator/setup-miniconda@v2
+          - name: Setup miniconda
+            uses: conda-incubator/setup-miniconda@v2
             with:
                 mamba-version="*"
           - name: Install dependencies
