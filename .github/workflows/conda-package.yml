@@ -1,5 +1,5 @@
 # Build a conda package from the latest tag.
-name: conda-build
+name: build-conda
 
 on:
   release:
@@ -28,7 +28,9 @@ jobs:
                 auto-update-conda: true
           - name: Install dependencies
             run: |
-              if [[ -z environment.yml ]]; then conda env update -n base -f environment.yml; elif [[ -z requirements.txt ]]; then $CONDA/bin/pip install -r requirements.txt; fi
+              # Use environment file if it exists, otherwise use pip and requirements.txt (if that exists)
+              if [[ -f environment.yml ]]; then conda env update -n base -f environment.yml; elif [[ -f requirements.txt ]]; then $CONDA/bin/pip install -r requirements.txt; fi
+              # Install dependencies for create_conda_meta
               conda install yaml requests conda-build
               git clone https://github.com/erikmannerfelt/create_conda_meta
               
