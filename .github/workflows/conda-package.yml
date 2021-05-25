@@ -34,7 +34,7 @@ jobs:
             run: |
               $CONDA/bin/python create_conda_meta/make_meta_yml.py --doc_url=https://glacier-lengths.readthedocs.io erikmannerfelt glacier_lengths erikmannerfelt > meta.yaml
               
-              conda-build .
+              $CONDA/bin/conda-build .
               
          
            
