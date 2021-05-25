@@ -9,6 +9,10 @@ on:
               description: 'Reason'     
               required: true
               default: 'testing'
+  push:
+    branches: [ conda-package ]
+  pull_request:
+    branches: [ conda-package ]
    
   
 jobs:
@@ -19,7 +23,8 @@ jobs:
           - name: Setup miniconda
             uses: conda-incubator/setup-miniconda@v2
             with:
-                mamba-version="*"
+                auto-update-conda: true
+                mamba-version: "*"
           - name: Install dependencies
             run: |
               mamba install yaml requests conda-build
