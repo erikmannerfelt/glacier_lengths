@@ -1,4 +1,5 @@
 # Build a conda package from the latest tag.
+name: build-conda
 
 on:
   release:
@@ -8,28 +9,32 @@ on:
             reason:
               description: 'Reason'     
               required: true
-              default: 'testing'
-   
-  
+              default: 'testing'  
 jobs:
    build-conda:
        runs-on: ubuntu-latest
        
        steps:
+          - uses: actions/checkout@v2
           - name: Setup miniconda
             uses: conda-incubator/setup-miniconda@v2
             with:
-                mamba-version="*"
+                auto-update-conda: true
           - name: Install dependencies
             run: |
-              mamba install yaml requests conda-build
-              git clone https://github.com/erikmannerfelt/create_conda_meta .
+              # Use environment file if it exists, otherwise use pip and requirements.txt (if that exists)
+              if [[ -f environment.yml ]]; then conda env update -n base -f environment.yml; elif [[ -f requirements.txt ]]; then $CONDA/bin/pip install -r requirements.txt; fi
+              # Install dependencies for create_conda_meta
+              conda install yaml requests conda-build
+              git clone https://github.com/erikmannerfelt/create_conda_meta
               
-          - name: Create conda metadata
+          - name: Create conda recipe
             run: |
-              python make_meta_yml.py --doc_url=https://glacier-lengths.readthedocs.io erikmannerfelt glacier_lengths erikmannerfelt > meta.yaml
+              $CONDA/bin/python create_conda_meta/make_meta_yml.py --doc_url=https://glacier-lengths.readthedocs.io erikmannerfelt glacier_lengths erikmannerfelt > meta.yaml
               
-              conda-build .
+          - name: Run conda-build
+            run: |
+              $CONDA/bin/conda-build .
               
          
            
