@@ -6,6 +6,8 @@
 
 [![PyPI version fury.io](https://badge.fury.io/py/glacier-lengths.svg)](https://pypi.python.org/pypi/glacier-lengths/)
 
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/glacier_lengths.svg)](https://anaconda.org/conda-forge/glacier_lengths) [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/glacier_lengths.svg)](https://anaconda.org/conda-forge/glacier_lengths)  [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/glacier_lengths.svg)](https://anaconda.org/conda-forge/glacier_lengths)
+
 Often when glacier lengths are calculated, only the glacier centerline is considered.
 This is arguably not a statistically representative measure for the entire front, as it just considers one point on the glacier outline.
 The `glacier_lengths` package aims to simplify length calculations along an arbitrary amount of lines buffered around the glacier centerline.
