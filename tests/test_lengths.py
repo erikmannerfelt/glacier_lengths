@@ -79,9 +79,10 @@ class TestCenterlines:
         assert abs(new_lengths.mean() - new_lengths2.mean()) < 0.01
 
         # Test that the distance threshold changes the count of valid centerlines
-        assert len(
-            glacier_lengths.cut_centerlines(buffered_centrelines, cut_line, max_difference_fraction=1).geoms
-        ) > len(glacier_lengths.cut_centerlines(buffered_centrelines, cut_line, max_difference_fraction=0.1).geoms)
+        all_lines = glacier_lengths.cut_centerlines(buffered_centrelines, cut_line, max_difference_fraction=1)
+        conservative_lines = glacier_lengths.cut_centerlines(buffered_centrelines, cut_line, max_difference_fraction=1e-3)
+
+        assert len(all_lines.geoms) > len(conservative_lines.geoms)
 
     @pytest.mark.skip("Not a quantitative test. Should be excluded in test suite.")
     def test_temp_plotting(self):
