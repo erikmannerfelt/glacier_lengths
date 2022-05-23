@@ -1,11 +1,6 @@
 import os
 from setuptools import setup
 
-REQS_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "requirements.txt")
-
-with open(REQS_FILENAME) as infile:
-    INSTALL_REQUIRES = infile.read().splitlines()
-
 with open("README.md", "r", encoding="utf-8") as infile:
     LONG_DESCRIPTION = infile.read()
 
@@ -36,7 +31,7 @@ setup(
     author="Erik Schytt Mannerfelt",
     author_email="mannerfelt@vaw.baug.ethz.ch",
     packages=["glacier_lengths"],
-    install_requires=INSTALL_REQUIRES,
+    install_requires=["shapely", "numpy"],
     extras_require={"matplotlib": ["matplotlib"]},
     python_requires=">=3.7",
 )
