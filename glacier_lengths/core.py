@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from typing import Any, Iterable, Union
+import warnings
 
 import numpy as np
 import shapely
@@ -205,6 +206,7 @@ def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geom
                     cutting_geometry: Union[shapely.geometry.LineString,
                                             shapely.geometry.Polygon, shapely.geometry.MultiPolygon],
                     max_difference_fraction: float = 0.2,
+                    warn_if_not_cut: bool = True,
                     ) -> Union[shapely.geometry.LineString, shapely.geometry.MultiLineString]:
     """
     Cut glacier centerlines with another geometry.
@@ -217,6 +219,7 @@ def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geom
                                     This is a filtering step to not include extremely small cut centerlines.
                                     A larger value will allow more centerlines to be valid.
                                     Defaults to 0.2 (80% of the longest centerline length).
+    :param warn_if_not_cut: Issue a warning if any of the centerlines were not cut by the cutting geometry.
 
     :returns: Cut glacier centerlines.
     """
@@ -239,7 +242,11 @@ def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geom
     assert cut_geometry.length > 0
 
     cropped_centrelines: list[shapely.geometry.LineString] = []
-    for line in iter_geom(cut_geometry):
+    for i, line in enumerate(iter_geom(cut_geometry)):
+        # Verify that any centerline was not cut
+        if warn_if_not_cut and any(line == other for other in iter_geom(centerlines)):
+            warnings.warn(f"Centerline nr. {i} was not cut by the cutting geometry.")
+
         first_and_last_points = np.array([
             [line.xy[0][0], line.xy[1][0]],
             [line.xy[0][-1], line.xy[1][-1]]
