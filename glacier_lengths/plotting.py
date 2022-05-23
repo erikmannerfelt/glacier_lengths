@@ -24,26 +24,27 @@ def plot_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geo
     :param centerlines: One or multiple glacier centrelines.
     :param glacier_outline: Optional. Glacier outline to give the centerlines context.
     :param plt_ax: Optional. A matplotlib axis to draw on. Defaults to the current axis.
-    :param plt_kwargs: Optional
+    :param centerline_kwargs: Optional. Keyword arguments to supply the centerline matplotlib plot() call.
+    :param outline_kwargs: Optional. Keyword arguments to supply the outline matplotlib plot() call.
     """
     if centerline_kwargs is None:
         centerline_kwargs = {}
     if outline_kwargs is None:
         outline_kwargs = {}
     if "color" not in centerline_kwargs:
-        centerline_kwargs["color"] = "black"
+        centerline_kwargs["color"] = "blue"
     if "color" not in outline_kwargs:
-        outline_kwargs["color"] = "blue"
+        outline_kwargs["color"] = "black"
 
     plt_ax = plt_ax or plt.gca()
 
     for line in iter_geom(centerlines):
-        plt_ax.plot(*line.xy, **outline_kwargs)
+        plt_ax.plot(*line.xy, **centerline_kwargs)
 
     if glacier_outline is not None:
         for outline in iter_geom(glacier_outline):
             for boundary in iter_geom(outline.boundary):
-                plt_ax.plot(*boundary.xy, **centerline_kwargs)
+                plt_ax.plot(*boundary.xy, **outline_kwargs)
 
     plt_ax.axis("equal")
 
