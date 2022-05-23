@@ -203,7 +203,8 @@ def geometry_to_line(geometry) -> Union[shapely.geometry.LineString, shapely.geo
 
 def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geometry.MultiLineString],
                     cutting_geometry: Union[shapely.geometry.LineString,
-                                            shapely.geometry.Polygon, shapely.geometry.MultiPolygon]
+                                            shapely.geometry.Polygon, shapely.geometry.MultiPolygon],
+                    max_difference_fraction: float = 0.2,
                     ) -> Union[shapely.geometry.LineString, shapely.geometry.MultiLineString]:
     """
     Cut glacier centerlines with another geometry.
@@ -212,6 +213,10 @@ def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geom
 
     :param centerlines: One or multiple glacier centerlines.
     :param cutting_geometry: A supported geometry to cut the centerlines with.
+    :param max_difference_fraction: The maximum difference of a centerline compared to the longest centerline.
+                                    This is a filtering step to not include extremely small cut centerlines.
+                                    A larger value will allow more centerlines to be valid.
+                                    Defaults to 0.2 (80% of the longest centerline length).
 
     :returns: Cut glacier centerlines.
     """
@@ -226,7 +231,7 @@ def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geom
                 longest_centerline = line
     # The maximum allowed line distance from the initial centreline point
     # This is to make sure that all lines have an almost common starting point (eg instead of being cropped mid-glacier)
-    distance_threshold = longest_centerline.length * 0.2
+    distance_threshold = longest_centerline.length * max_difference_fraction
     cutter = geometry_to_line(cutting_geometry)
     cut_geometry = shapely.ops.split(centerlines, cutter)
 

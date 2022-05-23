@@ -1,8 +1,8 @@
+import warnings
 
 import geopandas as gpd
 import numpy as np
 import pytest
-import warnings
 
 import glacier_lengths
 from glacier_lengths import examples
@@ -78,11 +78,17 @@ class TestCenterlines:
         assert old_lengths.mean() > new_lengths.mean()
         assert abs(new_lengths.mean() - new_lengths2.mean()) < 0.01
 
+        # Test that the distance threshold changes the count of valid centerlines
+        assert len(
+            glacier_lengths.cut_centerlines(buffered_centrelines, cut_line, max_difference_fraction=1).geoms
+        ) > len(glacier_lengths.cut_centerlines(buffered_centrelines, cut_line, max_difference_fraction=0.1).geoms)
+
     @pytest.mark.skip("Not a quantitative test. Should be excluded in test suite.")
     def test_temp_plotting(self):
 
-        from glacier_lengths.plotting import plot_centerlines
         import matplotlib.pyplot as plt
+
+        from glacier_lengths.plotting import plot_centerlines
 
         buffered_centrelines = glacier_lengths.buffer_centerline(self.centerline.geometry, self.old_outline.geometry)
 
