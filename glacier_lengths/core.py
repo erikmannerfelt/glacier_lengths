@@ -23,7 +23,7 @@ def iter_geom(geometry) -> Iterable:
             Only MultiLineString can be iterated over normally.
     """
     if "Multi" in geometry.geom_type or geometry.geom_type == "GeometryCollection":
-        return geometry
+        return geometry.geoms
 
     return [geometry]
 
@@ -219,9 +219,9 @@ def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geom
     _type_check_single_line_or_polygon(cutting_geometry, "cutting_geometry")
 
     # Find the longest centerline and use it as a proxy for the actual centerline.
-    longest_centerline = centerlines if centerlines.geom_type == "LineString" else centerlines[0]
+    longest_centerline = centerlines if centerlines.geom_type == "LineString" else centerlines.geoms[0]
     if centerlines.geom_type != "LineString":
-        for line in centerlines:
+        for line in iter_geom(centerlines):
             if line.length > longest_centerline.length:
                 longest_centerline = line
     # The maximum allowed line distance from the initial centreline point

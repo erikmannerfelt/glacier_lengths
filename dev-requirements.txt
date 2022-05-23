@@ -8,3 +8,4 @@ shapely
 numpy
 pylint
 sphinxcontrib-programoutput
+pytest

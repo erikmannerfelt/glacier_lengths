@@ -2,6 +2,7 @@
 import geopandas as gpd
 import numpy as np
 import pytest
+import warnings
 
 import glacier_lengths
 from glacier_lengths import examples
@@ -39,7 +40,7 @@ class TestCenterlines:
             max_radius=50,
             buffer_count=20,
         )
-        lengths = [line.length for line in buffered_centrelines]
+        lengths = [line.length for line in glacier_lengths.core.iter_geom(buffered_centrelines)]
 
         assert buffered_centrelines.geom_type == "MultiLineString"
         assert len(lengths) > 39
@@ -54,6 +55,9 @@ class TestCenterlines:
 
     def test_cut(self):
 
+        # Make sure tghat no warnings occur (added because of Shapely deprecation warnings)
+        warnings.simplefilter("error")
+
         buffered_centrelines = glacier_lengths.buffer_centerline(self.centerline.geometry, self.old_outline.geometry)
 
         cut_centerlines = glacier_lengths.cut_centerlines(buffered_centrelines, self.new_outline.geometry)
@@ -61,7 +65,7 @@ class TestCenterlines:
         cut_lines = self.new_outline.geometry.boundary
         if cut_lines.geom_type == "MultiLineString":
             # Extract the longest line.
-            cut_line = sorted(cut_lines, key=lambda x: x.length)[-1]
+            cut_line = sorted(cut_lines.geoms, key=lambda x: x.length)[-1]
         else:
             cut_line = cut_lines
 
