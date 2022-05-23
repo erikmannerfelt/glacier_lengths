@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from typing import Any, Iterable, Union
+import warnings
 
 import numpy as np
 import shapely
@@ -203,7 +204,9 @@ def geometry_to_line(geometry) -> Union[shapely.geometry.LineString, shapely.geo
 
 def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geometry.MultiLineString],
                     cutting_geometry: Union[shapely.geometry.LineString,
-                                            shapely.geometry.Polygon, shapely.geometry.MultiPolygon]
+                                            shapely.geometry.Polygon, shapely.geometry.MultiPolygon],
+                    max_difference_fraction: float = 0.2,
+                    warn_if_not_cut: bool = True,
                     ) -> Union[shapely.geometry.LineString, shapely.geometry.MultiLineString]:
     """
     Cut glacier centerlines with another geometry.
@@ -212,28 +215,38 @@ def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geom
 
     :param centerlines: One or multiple glacier centerlines.
     :param cutting_geometry: A supported geometry to cut the centerlines with.
+    :param max_difference_fraction: The maximum difference of a centerline compared to the longest centerline.
+                                    This is a filtering step to not include extremely small cut centerlines.
+                                    A larger value will allow more centerlines to be valid.
+                                    Defaults to 0.2 (80% of the longest centerline length).
+    :param warn_if_not_cut: Issue a warning if any of the centerlines were not cut by the cutting geometry.
 
     :returns: Cut glacier centerlines.
     """
     _type_check_line(centerlines, "centerlines")
     _type_check_single_line_or_polygon(cutting_geometry, "cutting_geometry")
 
+    cutter = geometry_to_line(cutting_geometry)
+    cut_geometry = shapely.ops.split(centerlines, cutter)
+
     # Find the longest centerline and use it as a proxy for the actual centerline.
-    longest_centerline = centerlines if centerlines.geom_type == "LineString" else centerlines.geoms[0]
-    if centerlines.geom_type != "LineString":
-        for line in iter_geom(centerlines):
+    longest_centerline = cut_geometry if cut_geometry.geom_type == "LineString" else cut_geometry.geoms[0]
+    if cut_geometry.geom_type != "LineString":
+        for line in iter_geom(cut_geometry):
             if line.length > longest_centerline.length:
                 longest_centerline = line
     # The maximum allowed line distance from the initial centreline point
     # This is to make sure that all lines have an almost common starting point (eg instead of being cropped mid-glacier)
-    distance_threshold = longest_centerline.length * 0.2
-    cutter = geometry_to_line(cutting_geometry)
-    cut_geometry = shapely.ops.split(centerlines, cutter)
+    distance_threshold = longest_centerline.length * max_difference_fraction
 
     assert cut_geometry.length > 0
 
     cropped_centrelines: list[shapely.geometry.LineString] = []
-    for line in iter_geom(cut_geometry):
+    for i, line in enumerate(iter_geom(cut_geometry)):
+        # Verify that any centerline was not cut
+        if warn_if_not_cut and any(line == other for other in iter_geom(centerlines)):
+            warnings.warn(f"Centerline nr. {i} was not cut by the cutting geometry.")
+
         first_and_last_points = np.array([
             [line.xy[0][0], line.xy[1][0]],
             [line.xy[0][-1], line.xy[1][-1]]
@@ -244,7 +257,7 @@ def cut_centerlines(centerlines: Union[shapely.geometry.LineString, shapely.geom
         if np.count_nonzero(distances < distance_threshold) == 0:
             continue
 
-        if (line.length / longest_centerline.length) < 0.2:
+        if (line.length / longest_centerline.length) < (1 - max_difference_fraction):
             continue
         cropped_centrelines.append(line)
 

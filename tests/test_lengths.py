@@ -1,8 +1,9 @@
+import warnings
 
 import geopandas as gpd
 import numpy as np
 import pytest
-import warnings
+import shapely.geometry
 
 import glacier_lengths
 from glacier_lengths import examples
@@ -75,14 +76,32 @@ class TestCenterlines:
         new_lengths = glacier_lengths.measure_lengths(cut_centerlines)
         new_lengths2 = glacier_lengths.measure_lengths(cut_centerlines2)
 
+        # Verify that warnings are triggered with a weird cutting geometry
+        with pytest.warns(match="Centerline nr. .* was not cut by the cutting geometry."):
+            glacier_lengths.cut_centerlines(buffered_centrelines, shapely.geometry.LineString([(0, 0), (1, 1)]))
+
+        # (Implicitly) verify that no warning is triggered with a weird cutting geometry if explicitly requested
+        glacier_lengths.cut_centerlines(
+            buffered_centrelines, shapely.geometry.LineString([(0, 0), (1, 1)]), warn_if_not_cut=False
+        )
+
         assert old_lengths.mean() > new_lengths.mean()
         assert abs(new_lengths.mean() - new_lengths2.mean()) < 0.01
+
+        # Test that the distance threshold changes the count of valid centerlines
+        all_lines = glacier_lengths.cut_centerlines(buffered_centrelines, cut_line, max_difference_fraction=1)
+        conservative_lines = glacier_lengths.cut_centerlines(
+            buffered_centrelines, cut_line, max_difference_fraction=1e-3
+        )
+
+        assert len(all_lines.geoms) > len(conservative_lines.geoms)
 
     @pytest.mark.skip("Not a quantitative test. Should be excluded in test suite.")
     def test_temp_plotting(self):
 
-        from glacier_lengths.plotting import plot_centerlines
         import matplotlib.pyplot as plt
+
+        from glacier_lengths.plotting import plot_centerlines
 
         buffered_centrelines = glacier_lengths.buffer_centerline(self.centerline.geometry, self.old_outline.geometry)
 
