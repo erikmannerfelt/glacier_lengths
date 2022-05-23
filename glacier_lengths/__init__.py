@@ -2,4 +2,4 @@
 from glacier_lengths.core import (buffer_centerline, cut_centerlines,
                                   measure_lengths)
 
-__version__ = "0.0.4"
+__version__ = "0.1.0"
