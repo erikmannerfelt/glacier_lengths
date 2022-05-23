@@ -7,6 +7,13 @@ on:
   release:
     types: [created]
 
+  workflow_dispatch:
+         inputs:
+            reason:
+              description: 'Reason'
+              required: true
+              default: 'testing'
+
 jobs:
   deploy:
 
