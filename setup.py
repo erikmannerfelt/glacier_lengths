@@ -1,6 +1,5 @@
 import os
-from distutils.core import setup
-from glacier_lengths import __version__
+from setuptools import setup
 
 REQS_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "requirements.txt")
 
@@ -10,11 +9,18 @@ with open(REQS_FILENAME) as infile:
 with open("README.md", "r", encoding="utf-8") as infile:
     LONG_DESCRIPTION = infile.read()
 
+with open("glacier_lengths/__init__.py") as infile:
+    for line in infile.read().splitlines():
+        if "__version__" not in line:
+            continue
+        VERSION = line.replace("__version__ = ", "").replace(" ", "").replace("\"", "")
+        break
+
 GITHUB_URL = "https://github.com/erikmannerfelt/glacier_lengths"
 
 setup(
     name="glacier_lengths",
-    version=__version__,
+    version=VERSION,
     description="Tools to measure glacier lengths statistically",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
